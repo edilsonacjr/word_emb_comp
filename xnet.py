@@ -1,22 +1,29 @@
-from igraph import *;
-import io;
-import numpy as np;
-import re;
+"""
+
+	Author: Filipi Nascimento (https://github.com/filipinascimento)
+
+"""
+
+
+from igraph import *
+import io
+import numpy as np
+import re
 
 
 def __textSplit2(text):
 	entries = text.split()
 	if(len(entries)<2):
-		raise ValueError();
-	return (float(entries[0]),float(entries[1]));
+		raise ValueError()
+	return (float(entries[0]),float(entries[1]))
 
 def __textSplit3(text):
 	entries = text.split()
 	if(len(entries)<3):
-		raise ValueError();
-	return (float(entries[0]),float(entries[1]),float(entries[2]));
+		raise ValueError()
+	return (float(entries[0]),float(entries[1]),float(entries[2]))
 
-__propertyHeaderRegular = re.compile("#([ve]) \"(.+)\" ([sn]|v2|v3)");
+__propertyHeaderRegular = re.compile("#([ve]) \"(.+)\" ([sn]|v2|v3)")
 __propertyFunctions = {
 	"s": str,
 	"n": float,
@@ -25,165 +32,165 @@ __propertyFunctions = {
 }
 
 def __readXnetVerticesHeader(fp,currentLineIndex,lastLine=""):
-	headerLine = lastLine;
+	headerLine = lastLine
 	if(len(headerLine)==0):
 		for lineData in fp:
-			headerLine = lineData.decode("utf-8").rstrip();
-			currentLineIndex+=1;
+			headerLine = lineData.decode("utf-8").rstrip()
+			currentLineIndex+=1
 			if(len(headerLine)>0):
-				break;
+				break
 
-	headerEntries = headerLine.split();
-	nodeCount = 0;
+	headerEntries = headerLine.split()
+	nodeCount = 0
 
 	if(len(headerEntries)==0 or headerEntries[0].lower() != "#vertices"):
-		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine));
+		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine))
 
 	try:
-		nodeCount = int(headerEntries[1]);
+		nodeCount = int(headerEntries[1])
 	except ValueError:
-		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine));
+		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine))
 
-	return (nodeCount,currentLineIndex,"");
+	return (nodeCount,currentLineIndex,"")
 
 def __readXnetNames(fp,currentLineIndex,lastLine=""):
-	names = [];
-	fileEnded = True;
+	names = []
+	fileEnded = True
 	for lineData in fp:
-		lineString = lineData.decode("utf-8").rstrip();
-		currentLineIndex+=1;
+		lineString = lineData.decode("utf-8").rstrip()
+		currentLineIndex+=1
 		
 		if(len(lineString)==0):
-			continue;
+			continue
 		
-		lastLine = lineString;
+		lastLine = lineString
 		
 		if(len(lineString)>0 and lineString[0]=="#"):
-			fileEnded = False;
-			break;
+			fileEnded = False
+			break
 		
 		if(len(lineString)>1 and lineString[0]=="\"" and lineString[-1]=="\""):
-			lineString = lineString[1:-1];
+			lineString = lineString[1:-1]
 		
-		names.append(lineString);
+		names.append(lineString)
 
 	if(fileEnded):
-		lastLine = "";
-	return (names,currentLineIndex,lastLine);
+		lastLine = ""
+	return (names,currentLineIndex,lastLine)
 
 
 def __readXnetEdgesHeader(fp,currentLineIndex,lastLine=""):
-	headerLine = lastLine;
+	headerLine = lastLine
 	if(len(headerLine)==0):
 		for lineData in fp:
-			headerLine = lineData.decode("utf-8").rstrip();
-			currentLineIndex+=1;
+			headerLine = lineData.decode("utf-8").rstrip()
+			currentLineIndex+=1
 			if(len(headerLine)>0):
-				break;
+				break
 	
-	headerEntries = headerLine.split();
+	headerEntries = headerLine.split()
 	
-	weighted = False;
-	directed = False;
+	weighted = False
+	directed = False
 
 	if(len(headerEntries)==0 or headerEntries[0].lower() != "#edges"):
-		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine));
+		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine))
 
 	for headerEntry in headerEntries:
 		if(headerEntry == "weighted"):
-			weighted = True;
+			weighted = True
 		if(headerEntry == "nonweighted"):
-			weighted = False;
+			weighted = False
 		if(headerEntry == "directed"):
-			directed = True;
+			directed = True
 		if(headerEntry == "undirected"):
-			directed = False;
+			directed = False
 
-	return ((weighted,directed),currentLineIndex,"");
+	return ((weighted,directed),currentLineIndex,"")
 
 def __readXnetEdges(fp,currentLineIndex,lastLine=""):
-	edges = [];
-	weights = [];
-	fileEnded = True;
+	edges = []
+	weights = []
+	fileEnded = True
 	for lineData in fp:
-		lineString = lineData.decode("utf-8").rstrip();
-		currentLineIndex+=1;
+		lineString = lineData.decode("utf-8").rstrip()
+		currentLineIndex+=1
 		
 		if(len(lineString)==0):
-			continue;
+			continue
 		
-		lastLine = lineString;
+		lastLine = lineString
 		
 		if(len(lineString)>0 and lineString[0]=="#"):
-			fileEnded=False;
-			break;
+			fileEnded=False
+			break
 		
-		entries = lineString.split();
+		entries = lineString.split()
 
 		if(len(entries)<2):
-			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine));
+			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine))
 		try:
-			edge = (int(entries[0]),int(entries[1]));
-			weight = 1.0;
+			edge = (int(entries[0]),int(entries[1]))
+			weight = 1.0
 			if(len(entries)>2):
-				weight = float(entries[2]);
-			edges.append(edge);
-			weights.append(weight);
+				weight = float(entries[2])
+			edges.append(edge)
+			weights.append(weight)
 		except ValueError:
-			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine));
+			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine))
 
 	if(fileEnded):
-		lastLine = "";
-	return ((edges,weights),currentLineIndex,lastLine);
+		lastLine = ""
+	return ((edges,weights),currentLineIndex,lastLine)
 
 def __readXnetPropertyHeader(fp,currentLineIndex,lastLine=""):
-	global __propertyHeaderRegular;
-	headerLine = lastLine;
+	global __propertyHeaderRegular
+	headerLine = lastLine
 	if(len(headerLine)==0):
 		for lineData in fp:
-			headerLine = lineData.decode("utf-8").rstrip();
-			currentLineIndex+=1;
+			headerLine = lineData.decode("utf-8").rstrip()
+			currentLineIndex+=1
 			if(len(headerLine)>0):
-				break;
+				break
 
-	headerEntries = __propertyHeaderRegular.findall(headerLine);
+	headerEntries = __propertyHeaderRegular.findall(headerLine)
 
 	if(len(headerEntries)==0 or (len(headerEntries)==1 and len(headerEntries[0])!=3)):
-		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine));
+		raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine))
 	
-	(propertyType,propertyName,propertyFormat) = headerEntries[0];
-	return ((propertyType,propertyName,propertyFormat),currentLineIndex,"");
+	(propertyType,propertyName,propertyFormat) = headerEntries[0]
+	return ((propertyType,propertyName,propertyFormat),currentLineIndex,"")
 
 def __readXnetProperty(fp,propertyFormat,currentLineIndex,lastLine=""):
-	global __propertyFunctions;
-	properties = [];
-	propertyFunction = __propertyFunctions[propertyFormat];
-	fileEnded = True;
+	global __propertyFunctions
+	properties = []
+	propertyFunction = __propertyFunctions[propertyFormat]
+	fileEnded = True
 	for lineData in fp:
-		lineString = lineData.decode("utf-8").rstrip();
-		currentLineIndex+=1;
+		lineString = lineData.decode("utf-8").rstrip()
+		currentLineIndex+=1
 		
 		if(len(lineString)==0):
-			continue;
+			continue
 		
-		lastLine = lineString;
+		lastLine = lineString
 		
 		if(len(lineString)>0 and lineString[0]=="#"):
-			fileEnded = False;
-			break;
+			fileEnded = False
+			break
 		
 		if(len(lineString)>1 and lineString[0]=="\"" and lineString[-1]=="\""):
-			lineString = lineString[1:-1];
+			lineString = lineString[1:-1]
 
 		try:
-			properties.append(propertyFunction(lineString));
+			properties.append(propertyFunction(lineString))
 		except ValueError:
-			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine));
+			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s"%(fp.name,currentLineIndex,headerLine))
 
 	if(fileEnded):
-		lastLine = "";
+		lastLine = ""
 
-	return (properties,currentLineIndex,lastLine);
+	return (properties,currentLineIndex,lastLine)
 
 def xnet2igraph(fileName='test.xnet'):
 	"""
@@ -194,33 +201,33 @@ def xnet2igraph(fileName='test.xnet'):
 	fileName : string
 	    Input file path.
 	"""
-	network = None;
+	network = None
 	with open(fileName, 'rb') as fp:
-		currentLineIndex = 0;
-		lastLine = "";
-		(nodeCount,currentLineIndex,lastLine) = __readXnetVerticesHeader(fp,currentLineIndex,lastLine);
-		(names,currentLineIndex,lastLine) = __readXnetNames(fp,currentLineIndex,lastLine);
+		currentLineIndex = 0
+		lastLine = ""
+		(nodeCount,currentLineIndex,lastLine) = __readXnetVerticesHeader(fp,currentLineIndex,lastLine)
+		(names,currentLineIndex,lastLine) = __readXnetNames(fp,currentLineIndex,lastLine)
 		if(len(names)>0 and len(names)<nodeCount):
-			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s [%d entries expected but only %d found]"%(fp.name,currentLineIndex,headerLine,nodeCount,len(names)));
-		((weighted,directed),currentLineIndex,lastLine) = __readXnetEdgesHeader(fp,currentLineIndex,lastLine);
-		((edges,weights),currentLineIndex,lastLine) = __readXnetEdges(fp,currentLineIndex,lastLine);
-		network = Graph(nodeCount,edges=edges,directed=directed);
+			raise ValueError("Malformed xnet file [%s:%d]\n\t>%s [%d entries expected but only %d found]"%(fp.name,currentLineIndex,headerLine,nodeCount,len(names)))
+		((weighted,directed),currentLineIndex,lastLine) = __readXnetEdgesHeader(fp,currentLineIndex,lastLine)
+		((edges,weights),currentLineIndex,lastLine) = __readXnetEdges(fp,currentLineIndex,lastLine)
+		network = Graph(nodeCount,edges=edges,directed=directed)
 		if(len(names)>0):
-			network.vs["name"] = names;
+			network.vs["name"] = names
 		if(weighted):
-			network.es["weight"] = weights;
+			network.es["weight"] = weights
 		while(lastLine!=""):
-			((propertyType,propertyName,propertyFormat),currentLineIndex,lastLine) = __readXnetPropertyHeader(fp,currentLineIndex,lastLine);
-			(properties,currentLineIndex,lastLine) = __readXnetProperty(fp,propertyFormat,currentLineIndex,lastLine);
+			((propertyType,propertyName,propertyFormat),currentLineIndex,lastLine) = __readXnetPropertyHeader(fp,currentLineIndex,lastLine)
+			(properties,currentLineIndex,lastLine) = __readXnetProperty(fp,propertyFormat,currentLineIndex,lastLine)
 			if(propertyType=="e"):
 				if(len(properties)>0 and len(properties)<len(edges)):
-					raise ValueError("Malformed xnet file [%s:%d]\n\t>%s [%d entries expected but only %d found]"%(fp.name,currentLineIndex,headerLine,len(edges),len(properties)));
-				network.es[propertyName] = properties;
+					raise ValueError("Malformed xnet file [%s:%d]\n\t>%s [%d entries expected but only %d found]"%(fp.name,currentLineIndex,headerLine,len(edges),len(properties)))
+				network.es[propertyName] = properties
 			elif(propertyType=="v"):
 				if(len(properties)>0 and len(properties)<nodeCount):
-					raise ValueError("Malformed xnet file [%s:%d]\n\t>%s [%d entries expected but only %d found]"%(fp.name,currentLineIndex,headerLine,nodeCount,len(properties)));
-				network.vs[propertyName] = properties;
-	return network;
+					raise ValueError("Malformed xnet file [%s:%d]\n\t>%s [%d entries expected but only %d found]"%(fp.name,currentLineIndex,headerLine,nodeCount,len(properties)))
+				network.vs[propertyName] = properties
+	return network
 
 
 
