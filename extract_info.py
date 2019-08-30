@@ -10,43 +10,27 @@
     pickle file of
 """
 
+import pandas as pd
+
 from collections import defaultdict
 
 from xnet import xnet2igraph
 
 
 def main():
-    file_path = 'data/wosAPSWithPACS_WithMAG_raw.xnet'
+    file_path = '../data/wosAPSWithPACS_WithMAG_raw.xnet'
 
     g = xnet2igraph(file_path)
 
     data = {
-        'abstract': [],
-        'year': [],
-        'language': [],
-        'hasabs': [],
-        'doi': [],
+        'abstract': g.vs['Title and Abstract'],
+        'year': g.vs['Year Published'],
+        'language': g.vs['Language'],
     }
 
-    info_pairs = [('abstract', '#v "Title and Abstract" s\n'),
-                  ('year', '#v "Year Published" n\n'),
-                  ('language', '#v "Language" s\n'),
-                  ('hasabs', '#v "hasAbstract" s\n'),
-                  ('doi', '#v "Digital Object Identifier (DOI)" s\n')]
+    df = pd.DataFrame.from_dict(data)
 
-    edges = defaultdict(list)
-
-    for dic_key, info_name in info_pairs:
-        with open(file_path, 'r') as origin_file:
-            read_flag = False
-            for line in origin_file:
-                if read_flag and line[:2] != '#v':
-                    data[dic_key].append(line.strip())
-
-                if line == info_name:
-                    read_flag = True
-                elif read_flag and line[:2] == '#v':
-                    break
+    df.to_feather('data/all_data.feather')
 
 
 if __name__ == '__main__':

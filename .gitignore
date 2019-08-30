@@ -1,0 +1,7 @@
+output/*
+output_test/*
+data/*
+plots/*
+.idea/*
+*.txt
+*.csv
