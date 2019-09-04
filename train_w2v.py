@@ -60,5 +60,6 @@ def main():
         wv = KeyedVectors.load("wordvectors_{}.kv".format(''))
         """
 
+
 if __name__ == '__main__':
     main()
