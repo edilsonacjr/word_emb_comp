@@ -13,6 +13,7 @@ import nltk
 import pandas as pd
 
 from gensim.models import Word2Vec
+from gensim.models.phrases import Phrases, Phraser
 
 
 def main():
@@ -39,10 +40,15 @@ def main():
                       not w.isnumeric() and len(w) > 1]
             preprocessed_texts.append(tokens)
 
+        phrases = Phrases(preprocessed_texts, min_count=5)
+        bigram = Phraser(phrases)
+
+        preprocessed_texts = bigram[preprocessed_texts]
+
         # input format
         # preprocessed_texts = [['casa', 'maria', 'jose'], ['nlp', 'texto', 'agora']]
 
-        model = Word2Vec(size=vec_dim, window=5, min_count=1, workers=4, sg=1)
+        model = Word2Vec(size=vec_dim, window=5, min_count=5, workers=4, sg=1)
 
         model.build_vocab(preprocessed_texts, progress_per=10000)
 

@@ -14,6 +14,7 @@ from gensim.models import KeyedVectors
 plt.rcParams["figure.figsize"] = [15, 40]
 sns.set_style("dark")
 
+
 def main():
 
     words_study = ['gene']
