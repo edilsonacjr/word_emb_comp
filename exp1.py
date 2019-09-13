@@ -1,6 +1,7 @@
 
 """
     What happens to the distance between words in time?
+    A set of bar plots of the evolution (of similarity) of specific words to another group of words in time.
 """
 
 import pandas as pd
